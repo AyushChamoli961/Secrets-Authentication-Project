@@ -29,7 +29,7 @@ app.use(session ({
 app.use(passport.initialize())
 app.use(passport.session())
 
-mongoose.connect("mongodb://localhost:27017/userDB" , {useNewUrlParser:true})
+mongoose.connect("mongodb+srv://AyushChamoli:eQQ76EcUZVQFV6xB@cluster0.hj0m1co.mongodb.net/userDB",{useNewurlParser:true})
 
 
 const userSchema = new mongoose.Schema({
@@ -42,7 +42,6 @@ const userSchema = new mongoose.Schema({
 userSchema.plugin(passportLocalMongoose)
 userSchema.plugin(findOrCreate)
 
-const secret="this."
 const User = new mongoose.model("User",userSchema)
 passport.use(User.createStrategy());
 
@@ -133,24 +132,20 @@ app.get("/submit" , function(req , res){
     }
 })
 app.post("/submit", function(req, res){
-    const submittedSecret = req.body.secret;
-  
-  //Once the user is authenticated and their session gets saved, their user details are saved to req.user.
-    // console.log(req.user.id);
   
     User.findById(req.user.id, function(err, foundUser){
       if (err) {
         console.log(err);
       } else {
         if (foundUser) {
-          foundUser.secret = submittedSecret;
+          foundUser.secret = req.body.secret
           foundUser.save(function(){
-            res.redirect("/secrets");
-          });
+            res.redirect("/secrets")
+          })
         }
       }
-    });
-  });
+    })
+  })
 
 app.post("/register" , function(req , res){
    User.register({username: req.body.username} , req.body.password ,function(err,result){
@@ -186,6 +181,11 @@ app.post("/login", function(req, res){
     })
 })
 
-app.listen(3000,function(req,res){
-    console.log("Server started on port 3000");
-})
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
+app.listen(port, function() {
+  console.log("Server started on port 3000");
+});
